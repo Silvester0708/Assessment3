@@ -245,6 +245,7 @@ def add_user(username, password, email):
     return new_user
 
 # load all movies from the Movies sheet into Movie objects
+@st.cache_data(ttl=30)
 def get_all_movies():
     records = movies_ws.get_all_records()
     movies = []
@@ -254,6 +255,7 @@ def get_all_movies():
     return movies
 
 # load all ratings from the Ratings sheet as a list of dicts
+@st.cache_data(ttl=30)
 def get_all_ratings():
     records = ratings_ws.get_all_records()
     ratings = []
@@ -429,6 +431,7 @@ def show_search_and_rate():
                             rating_id = f"r{len(ratings_ws.get_all_records()) + 1}"
                             new_rating = Rating(rating_id, user.getAccountId(), movie.getMovieId(), score + 1)
                             new_rating.save(ratings_ws)
+                            get_all_ratings.clear()
 
                             # recalculate this movie's real average rating from all scores
                             updated_ratings = get_all_ratings()
@@ -436,6 +439,7 @@ def show_search_and_rate():
                             movie.updateAvgRating(movie_scores)
                             admin_for_update = Admin("admin1", ADMIN_KEY)
                             admin_for_update.editMovie(movie, movies_ws)
+                            get_all_movies.clear()
 
                             st.session_state.rating_success = f"Rated {movie.getTitle()} {score + 1} stars!"
                             st.rerun()
@@ -598,6 +602,7 @@ def show_manage_movies():
                 new_id = get_next_movie_id()
                 new_movie = Movie(new_id, new_title, new_genre, new_rating)
                 admin.addMovie(new_movie, movies_ws)
+                get_all_movies.clear()
                 st.session_state.movie_success = f"Added '{new_title}'."
                 st.rerun()
 
@@ -618,6 +623,7 @@ def show_manage_movies():
             if st.button("Save changes", key=f"edit_movie_btn_{movie_id}", use_container_width=True):
                 updated_movie = Movie(movie_id, edit_title, edit_genre, edit_rating)
                 admin.editMovie(updated_movie, movies_ws)
+                get_all_movies.clear()
                 st.session_state.movie_success = f"Updated '{edit_title}'."
                 st.rerun()
 
@@ -633,6 +639,7 @@ def show_manage_movies():
             st.warning(f"This will permanently remove '{selected_movie.getTitle()}'.")
             if st.button("Remove movie", key="remove_movie_btn", use_container_width=True):
                 admin.removeMovie(selected_movie.getMovieId(), movies_ws)
+                get_all_movies.clear()
                 st.session_state.movie_success = f"Removed '{selected_movie.getTitle()}'."
                 st.rerun()
 
