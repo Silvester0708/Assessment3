@@ -223,7 +223,11 @@ def get_sheet():
     client = gspread.authorize(creds)
     return client.open("MRS_Database")
 
-sheet = get_sheet()
+try:
+    sheet = get_sheet()
+except Exception as e:
+    st.error(f"Failed to connect to Google Sheets: {e}")
+    st.stop()
 # one worksheet ("tab") per data type, acting as our tables
 users_ws = sheet.worksheet("Users")
 ratings_ws = sheet.worksheet("Ratings")
