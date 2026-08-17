@@ -201,10 +201,16 @@ class RecommendationEngine:
         for r in self.__ratingData:
             counts[r["movieId"]] = counts.get(r["movieId"], 0) + 1
 
-        # sort the movie IDs by count descending and take the top 5
+        # sort the movie IDs by count descending and take the top N
         sorted_ids = sorted(counts, key=counts.get, reverse=True)[:top_n]
-        # find the movies and return the details
-        trending_movies = [m for m in self.__movieList if m.getMovieId() in sorted_ids]
+
+        # look up each movie in ranked order, not catalog order
+        trending_movies = []
+        for movie_id in sorted_ids:
+            movie = next((m for m in self.__movieList if m.getMovieId() == movie_id), None)
+            if movie:
+                trending_movies.append(movie)
+
         return [m.getDetails() for m in trending_movies]
 
 # --- Database connection ---
