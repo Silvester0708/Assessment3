@@ -1,0 +1,6 @@
+streamlit
+streamlit-option-menu
+gspread
+google-auth
+datetime
+pandas
