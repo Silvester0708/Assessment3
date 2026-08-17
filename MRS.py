@@ -695,6 +695,20 @@ def show_engagement_analytics():
         st.bar_chart(genre_chart_data)
 
     st.divider()
+    st.markdown("**Average rating comparison**")
+
+    # only include movies that have at least one real rating
+    rated_movie_ids = {r["movieId"] for r in all_ratings}
+    rated_movies = [m for m in all_movies if m.getMovieId() in rated_movie_ids]
+    rated_movies.sort(key=lambda m: m.getAvgRating(), reverse=True)
+
+    avg_rating_data = pd.DataFrame({
+        "Movie": [m.getTitle() for m in rated_movies],
+        "Avg rating": [m.getAvgRating() for m in rated_movies],
+    }).set_index("Movie")
+    st.bar_chart(avg_rating_data)
+
+    st.divider()
     st.markdown("**Full breakdown**")
 
     # display the full breakdown in a table
